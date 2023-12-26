@@ -1,0 +1,72 @@
+group = 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "net.serenity-bdd:serenity-gradle-plugin:4.0.15"
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: "net.serenity-bdd.serenity-gradle-plugin"
+
+sourceCompatibility = JavaVersion.VERSION_11
+
+ext {
+    SERENITY_VERSION = '4.0.15'
+    LOGBACK_CLASSIC_VERSION = '1.4.7'
+    ASSERTJ_CORE_VERSION = '3.22.0'
+}
+
+dependencies {
+    implementation 'org.seleniumhq.selenium:selenium-java:4.7.0'
+    implementation 'io.appium:java-client:8.3.0'
+    implementation 'co.com.devco.automation:automationDevcoLibrary:2.0.4'
+    implementation "net.serenity-bdd:serenity-core:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-junit:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-screenplay:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-screenplay-webdriver:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-ensure:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-cucumber:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-screenplay-rest:${SERENITY_VERSION}"
+    implementation "net.serenity-bdd:serenity-rest-assured:${SERENITY_VERSION}"
+    testImplementation "org.hamcrest:hamcrest-all:1.3"
+    testImplementation "junit:junit:4.13.1"
+    implementation "ch.qos.logback:logback-classic:${LOGBACK_CLASSIC_VERSION}"
+    testImplementation "org.assertj:assertj-core:${ASSERTJ_CORE_VERSION}"
+}
+
+tasks.withType(Test) {
+    systemProperty "file.encoding", "UTF-8"
+    reports {'gradle reports'}
+    systemProperty "webdriver.chrome.driver", System.getProperty("webdriver.chrome.driver")
+    maxParallelForks = Runtime.runtime.availableProcessors()
+}
+
+wrapper {
+    gradleVersion = '8.0'
+}
+
+serenity {
+    reports = ["single-page-html"]
+}
+
+gradle.startParameter.continueOnFailure = true
+
+test.finalizedBy(aggregate)
